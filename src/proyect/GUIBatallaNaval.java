@@ -313,40 +313,6 @@ public class GUIBatallaNaval extends JFrame {
         setEscuchaCasillas(evento.equals("agregar") ? "agregar" : "remover");
     }
 
-    /**
-     * Método que maneja las funciones de combate cuando se realiza un ataque a una casilla.
-     *
-     * @param row   La fila de la casilla atacada.
-     * @param col   La columna de la casilla atacada.
-     * @param barco El nombre del barco atacado.
-     */
-    public void funcionesCombate(int row, int col, String barco) {
-        ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").getMatriz()[row][col].setIcon(new ImageIcon(getClass().getResource("/recursos/tocado.png")));
-        panelMatrices.getTablero("principal").getMatriz()[row][col].setIcon(new ImageIcon(getClass().getResource("/recursos/tocado.png")));
-        panelMatrices.getTablero("principal").getCasillasOcupadas().replace(panelMatrices.getTablero("principal").getMatriz()[row][col], 2);
-        ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").reducirCasillasUsadas(barco);
-        if (ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").getCasillaBarco().get(ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").getMatriz()[row][col]).equals(Integer.valueOf(0)))
-        {
-            estadoJuego = 5;
-            contadorHundidos++;
-            for (int fil = 1; fil < 11; fil++) {
-                for (int colu = 1; colu < 11; colu++) {
-                    String nombreBarco = (String) ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").getCasillaNombreBarco().get(ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").getMatriz()[fil][colu]);
-
-                    if (nombreBarco != null && nombreBarco.equals(barco)) {
-                        ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").getMatriz()[fil][colu].setIcon(new ImageIcon(getClass().getResource("/recursos/hundido.png")));
-                        panelMatrices.getTablero("principal").getMatriz()[fil][colu].setIcon(new ImageIcon(getClass().getResource("/recursos/hundido.png")));
-                    }
-                }
-            }
-        } else {
-            estadoJuego = 5;
-        }
-
-        if (contadorHundidos == 10) {
-            setEscuchaCasillasPrincipal("remover");
-        }
-    }
 
     /**
      * Método que devuelve el panelTablero utilizado en el juego.
