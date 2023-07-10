@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * Clase que se encarga de pintar los barcos en el tablero.
  */
 public class MostrarBarcos {
-    private proyect.PanelMatrices panelMatrices;
+    private PanelMatrices panelMatrices;
     private PanelAsignaciones panelAsignaciones;
     private int barcoUsado; // Acumulador para identificar cuál nave ha sido desplegada (en orden del 1 al 10)
     private ArrayList<Integer> casillasUsadasBarco; // casillas usadas por cada nave
@@ -23,7 +23,7 @@ public class MostrarBarcos {
     /**
      * Constructor de la clase PintarFlota.
      */
-    public MostrarBarcos(proyect.PanelMatrices _panelMatrices, PanelAsignaciones _panelAsignaciones) {
+    public MostrarBarcos(PanelMatrices _panelMatrices, PanelAsignaciones _panelAsignaciones) {
         panelMatrices = _panelMatrices;
         panelAsignaciones = _panelAsignaciones;
         barcoUsado = 1;

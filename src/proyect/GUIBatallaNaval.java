@@ -34,7 +34,7 @@ public class GUIBatallaNaval extends JFrame {
     private Escucha escucha;
     private ImageIcon infoSentidos;
     private JPanel panelNorte, panelSur, panelEste, panelCentro;
-    private proyect.PanelMatrices panelMatrices;
+    private PanelMatrices panelMatrices;
     private MostrarBarcos mostrarBarcos;
     private PanelAsignaciones panelAsignaciones;
     private GUIPosicionesCPU ventanaOponente;
@@ -104,7 +104,7 @@ public class GUIBatallaNaval extends JFrame {
         ayuda = createButton("Ayuda", escucha, 40, Color.PINK);
         panelSur.add(ayuda, FlowLayout.LEFT);
 
-        panelMatrices = new proyect.PanelMatrices();
+        panelMatrices = new PanelMatrices();
         panelEste.add(panelMatrices);
 
         Jugar = createButton("Jugar", comenzarPartidaListener, 40, Color.PINK);
@@ -351,7 +351,7 @@ public class GUIBatallaNaval extends JFrame {
     /**
      * Método que devuelve el panelTablero utilizado en el juego.
      */
-    public proyect.PanelMatrices getPanelTablero() {
+    public PanelMatrices getPanelTablero() {
         return panelMatrices;
     }
 

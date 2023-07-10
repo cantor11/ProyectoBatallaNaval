@@ -7,15 +7,15 @@ package proyect;
  * @author Johan Castro edier.castro@correounivalle.edu.co
  */
 public class Batalla {
-    private proyect.PanelMatrices panelMatrices;
-    private proyect.PanelCPUTablero panelCPUTablero;
+    private PanelMatrices panelMatrices;
+    private PanelCPUTablero panelCPUTablero;
 
     /**
      * Constructor de la clase Combate
      * @param _panelMatrices
      * @param _panelCPUTablero
      */
-    public Batalla(proyect.PanelMatrices _panelMatrices, proyect.PanelCPUTablero _panelCPUTablero){
+    public Batalla(PanelMatrices _panelMatrices, PanelCPUTablero _panelCPUTablero){
         this.panelMatrices = _panelMatrices;
         this.panelCPUTablero = _panelCPUTablero;
     }

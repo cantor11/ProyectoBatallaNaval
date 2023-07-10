@@ -1,4 +1,4 @@
-package project;
+package proyect;
 
 import javax.swing.*;
 import java.util.HashMap;
