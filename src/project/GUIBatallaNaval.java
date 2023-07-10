@@ -34,7 +34,7 @@ public class GUIBatallaNaval extends JFrame {
     private Escucha escucha;
     private ImageIcon infoSentidos;
     private JPanel panelNorte, panelSur, panelEste, panelCentro;
-    private PanelMatrices panelMatrices;
+    private proyect.PanelMatrices panelMatrices;
     private MostrarBarcos mostrarBarcos;
     private PanelAsignaciones panelAsignaciones;
     private GUIPosicionesCPU ventanaOponente;
@@ -104,7 +104,7 @@ public class GUIBatallaNaval extends JFrame {
         ayuda = createButton("Ayuda", escucha, 40, Color.PINK);
         panelSur.add(ayuda, FlowLayout.LEFT);
 
-        panelMatrices = new PanelMatrices();
+        panelMatrices = new proyect.PanelMatrices();
         panelEste.add(panelMatrices);
 
         Jugar = createButton("Jugar", comenzarPartidaListener, 40, Color.PINK);
@@ -205,9 +205,275 @@ public class GUIBatallaNaval extends JFrame {
     }
 
     /**
-     * inner class that extends an Adapter Class or implements Listeners used by GUI class
+     * Clase que implementa MouseListener y se utiliza para manejar los eventos de clic y movimiento del mouse en las casillas del tablero.
      */
-    private class Escucha {
+    private class EscuchaPosiciones implements MouseListener {
 
+        @Override
+        public void mouseClicked(MouseEvent e) {}
+
+        /**
+         * Método que se ejecuta cuando se presiona el botón del mouse.
+         */
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON3) {
+                orientacion = 1 - orientacion;
+                sentidoOrientacion = orientacion == 1 ? 3 : 2;
+            } else if (e.getButton() == MouseEvent.BUTTON1) {
+                if (barcoVinculadoCount < barcosList.length) {
+                    for (int row = 1; row < 11; row++) {
+                        for (int col = 1; col < 11; col++) {
+                            if (e.getSource() == panelMatrices.getTablero("posicion").getMatriz()[row][col]) {
+                                mostrarBarcos.posicionarBarco(barcosList[barcoVinculadoCount], col, row, orientacion);
+                                barcoVinculadoCount++;
+                                if (barcoVinculadoCount >= barcosList.length) {
+                                    comienzaLaGuerra();
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    comienzaLaGuerra();
+                }
+            }
+        }
+
+        /**
+         * Método que se ejecuta cuando se suelta el botón del mouse.
+         */
+        @Override
+        public void mouseReleased(MouseEvent e) {}
+
+        /**
+         * Método que se ejecuta cuando el puntero del mouse entra en una casilla del tablero.
+         */
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            if (barcoVinculadoCount < barcosList.length) {
+                for (int row = 1; row < 11; row++) {
+                    for (int col = 1; col < 11; col++) {
+                        mostrarBarcos.removerIcon(col, row);
+                        if (e.getSource() == panelMatrices.getTablero("posicion").getMatriz()[row][col]) {
+                            if (mostrarBarcos.funcionesFlota(barcosList[barcoVinculadoCount], orientacion, sentidoOrientacion, col, row)) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            repaint();
+            revalidate();
+        }
+
+        /**
+         * Método que se ejecuta cuando el puntero del mouse sale de una casilla del tablero.
+         */
+        @Override
+        public void mouseExited(MouseEvent e) {}
+
+        /**
+         * Método que inicia la etapa de combate de la partida.
+         * Realiza las acciones necesarias para iniciar la fase de ataque.
+         */
+        public void comienzaLaGuerra() {
+            headerProject.setText("¡Hora del ataque! ");
+            for (JLabel[] row : panelMatrices.getTablero("posicion").getMatriz()) {
+                for (JLabel casilla : row) {
+                    casilla.removeMouseListener(escuchaPosiciones);
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Método que establece los escuchadores de eventos en las casillas del tablero.
+     */
+    public void setEscuchaCasillas(String evento) {
+        boolean agregar = evento.equals("agregar");
+        String tablero = agregar ? "posicion" : "principal";
+        for (JLabel[] row : panelMatrices.getTablero(tablero).getMatriz()) {
+            for (JLabel casilla : row) {
+                if (agregar) {
+                    casilla.addMouseListener(escucha);
+                } else {
+                    casilla.removeMouseListener(escucha);
+                }
+            }
+        }
+    }
+
+    /**
+     * Método que establece los escuchadores de eventos en las casillas del tablero principal.
+     *
+     * @param evento El evento que se va a manejar.
+     */
+    public void setEscuchaCasillasPrincipal(String evento) {
+        setEscuchaCasillas(evento.equals("agregar") ? "agregar" : "remover");
+    }
+
+    /**
+     * Método que maneja las funciones de combate cuando se realiza un ataque a una casilla.
+     *
+     * @param row   La fila de la casilla atacada.
+     * @param col   La columna de la casilla atacada.
+     * @param barco El nombre del barco atacado.
+     */
+    public void funcionesCombate(int row, int col, String barco) {
+        ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").getMatriz()[row][col].setIcon(new ImageIcon(getClass().getResource("/recursos/tocado.png")));
+        panelMatrices.getTablero("principal").getMatriz()[row][col].setIcon(new ImageIcon(getClass().getResource("/recursos/tocado.png")));
+        panelMatrices.getTablero("principal").getCasillasOcupadas().replace(panelMatrices.getTablero("principal").getMatriz()[row][col], 2);
+        ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").reducirCasillasUsadas(barco);
+        if (ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").getCasillaBarco().get(ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").getMatriz()[row][col]).equals(Integer.valueOf(0)))
+        {
+            estadoJuego = 5;
+            contadorHundidos++;
+            for (int fil = 1; fil < 11; fil++) {
+                for (int colu = 1; colu < 11; colu++) {
+                    String nombreBarco = (String) ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").getCasillaNombreBarco().get(ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").getMatriz()[fil][colu]);
+
+                    if (nombreBarco != null && nombreBarco.equals(barco)) {
+                        ventanaOponente.getPanelTableroOponente().getTableroOponente("posicion").getMatriz()[fil][colu].setIcon(new ImageIcon(getClass().getResource("/recursos/hundido.png")));
+                        panelMatrices.getTablero("principal").getMatriz()[fil][colu].setIcon(new ImageIcon(getClass().getResource("/recursos/hundido.png")));
+                    }
+                }
+            }
+        } else {
+            estadoJuego = 5;
+        }
+
+        if (contadorHundidos == 10) {
+            setEscuchaCasillasPrincipal("remover");
+        }
+    }
+
+    /**
+     * Método que devuelve el panelTablero utilizado en el juego.
+     */
+    public proyect.PanelMatrices getPanelTablero() {
+        return panelMatrices;
+    }
+
+    /**
+     * Clase que implementa ActionListener y MouseListener y se utiliza para manejar los eventos de los botones y casillas del juego.
+     */
+    private class Escucha implements ActionListener, MouseListener {
+
+        /**
+         * Método que se ejecuta cuando se produce un evento de acción.
+         */
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (e.getSource() == ayuda) {
+                JOptionPane.showMessageDialog(null, AYUDA, "¿Cómo se juega batalla naval?", JOptionPane.PLAIN_MESSAGE);
+            } else if (e.getSource() == Jugar) {
+                Jugar.removeActionListener(this);
+                panelAsignaciones.getAsignarTurno().setText("¡Tu turno!");
+                panelAsignaciones.getInformacionJuego().setText("Selecciona la nave que quieres desplegar");
+            } else if (e.getSource() == PosicionesCPU) {
+                ventanaOponente.setVisible(true);
+            } else if (e.getSource() == panelAsignaciones.getExplicacionBotones()) {
+                JOptionPane.showMessageDialog(null, "", "Cómo jugar", JOptionPane.PLAIN_MESSAGE, infoSentidos);
+            } else if (estadoJuego == 6 && e.getSource() == timer) {
+                ventanaOponente.oponenteVsUsuario();
+                if (ventanaOponente.getEstado() == 0) {
+                    timer.stop();
+                    estadoJuego = 5;
+                    panelAsignaciones.getAsignarTurno().setText("Tu turno");
+                    panelAsignaciones.getInformacionJuego().setText("Selecciona otra casilla del tablero principal");
+                } else if (ventanaOponente.getEstado() == 2) {
+                    timer.stop();
+                    panelAsignaciones.getInformacionJuego().setText("Tus barcos han sido hundidos, perdiste el juego");
+                }
+            }
+        }
+
+        /**
+         * Método que se ejecuta cuando se produce el evento de clic del mouse.
+         */
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            int auxiliar = 0;
+            switch (estadoJuego) {
+                case 1:
+                    if (e.getSource() == panelAsignaciones.getBotonBarco("portavion")) {
+                        if (panelAsignaciones.getCantidadBarco("portavion") > 0) {
+                            panelAsignaciones.setCantidadBarco("portavion");
+                            panelAsignaciones.getInformacionJuego().setText("Escoge si quieres ubicarlo vertical u horizontal");
+                            panelAsignaciones.setNombreBoton("portavion");
+                            estadoJuego = 2;
+                        } else {
+                            panelAsignaciones.getInformacionJuego().setText("No hay más portaviones disponibles");
+                        }
+                    } else if (e.getSource() == panelAsignaciones.getBotonBarco("destructor")) {
+                        if (panelAsignaciones.getCantidadBarco("destructor") > 0) {
+                            panelAsignaciones.setCantidadBarco("destructor");
+                            panelAsignaciones.getInformacionJuego().setText("Escoge si quieres ubicarlo vertical u horizontal");
+                            panelAsignaciones.setNombreBoton("destructor");
+                            estadoJuego = 2;
+                        } else {
+                            panelAsignaciones.getInformacionJuego().setText("No hay más destructores disponibles");
+                        }
+                    } else if (e.getSource() == panelAsignaciones.getBotonBarco("fragata")) {
+                        if (panelAsignaciones.getCantidadBarco("fragata") > 0) {
+                            panelAsignaciones.setCantidadBarco("fragata");
+                            panelAsignaciones.getInformacionJuego().setText("Escoge si quieres ubicarlo vertical u horizontal");
+                            panelAsignaciones.setNombreBoton("fragata");
+                            estadoJuego = 2;
+                        } else {
+                            panelAsignaciones.getInformacionJuego().setText("No hay más fragatas disponibles");
+                        }
+                    } else if (e.getSource() == panelAsignaciones.getBotonBarco("submarino")) {
+                        if (panelAsignaciones.getCantidadBarco("submarino") > 0) {
+                            panelAsignaciones.setCantidadBarco("submarino");
+                            panelAsignaciones.getInformacionJuego().setText("Escoge si quieres ubicarlo vertical u horizontal");
+                            panelAsignaciones.setNombreBoton("submarino");
+                            estadoJuego = 2;
+                        } else {
+                            panelAsignaciones.getInformacionJuego().setText("No hay más submarinos disponibles");
+                        }
+                    }
+                    break;
+                case 2:
+                    if (e.getSource() == panelAsignaciones.getBotonOrientacion("vertical")) {
+                        panelAsignaciones.getInformacionJuego().setText("Escoge cual sentido quieres usar");
+                        panelAsignaciones.setOrientacion(0);
+                        estadoJuego = 3;
+                    } else if (e.getSource() == panelAsignaciones.getBotonOrientacion("horizontal")) {
+                        panelAsignaciones.getInformacionJuego().setText("Escoge cual sentido quieres usar");
+                        panelAsignaciones.setOrientacion(1);
+                        estadoJuego = 3;
+                    }
+                    break;
+                case 3:
+                    if (e.getSource() == panelAsignaciones.getBotonSentidoOrientacion("sup_inf")) {
+                        panelAsignaciones.getInformacionJuego().setText("Selecciona la casilla en la que quieres ubicar la nave");
+                        setEscuchaCasillas("agregar");
+                        panelAsignaciones.setSentidoOrientacion(1);
+                        estadoJuego = 4;
+                    } else if (e.getSource() == panelAsignaciones.getBotonSentidoOrientacion("inf_sup")) {
+                        panelAsignaciones.getInformacionJuego().setText("Selecciona la casilla en la que quieres ubicar la nave");
+                        setEscuchaCasillas("agregar");
+                        panelAsignaciones.setSentidoOrientacion(2);
+                        estadoJuego = 4;
+                    } else if (e.getSource() == panelAsignaciones.getBotonSentidoOrientacion("izq_der")) {
+                        panelAsignaciones.getInformacionJuego().setText("Selecciona la casilla en la que quieres ubicar la nave");
+                        setEscuchaCasillas("agregar");
+                        panelAsignaciones.setSentidoOrientacion(3);
+                        estadoJuego = 4;
+                    } else if (e.getSource() == panelAsignaciones.getBotonSentidoOrientacion("der_izq")) {
+                        panelAsignaciones.getInformacionJuego().setText("Selecciona la casilla en la que quieres ubicar la nave");
+                        setEscuchaCasillas("agregar");
+                        panelAsignaciones.setSentidoOrientacion(4);
+                        estadoJuego = 4;
+                    }
+                    break;
+            }
+        }
+        public void mousePressed(MouseEvent e) {}
+        public void mouseReleased(MouseEvent e) {}
+        public void mouseEntered(MouseEvent e) {}
+        public void mouseExited(MouseEvent e) {}
     }
 }
